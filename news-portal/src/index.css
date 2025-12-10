@@ -1,0 +1,278 @@
+/* -------------------------------------------------------
+   Global Styles
+-------------------------------------------------------- */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", Arial, sans-serif;
+}
+
+body {
+  background: #f3f4f6;
+  padding: 20px;
+  color: #222;
+}
+
+/* Utility container */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+
+/* -------------------------------------------------------
+   Navbar
+-------------------------------------------------------- */
+
+.navbar {
+  background: #111827;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.navbar a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.navbar-right {
+  display: flex;
+  gap: 15px;
+}
+
+
+/* -------------------------------------------------------
+   Headings
+-------------------------------------------------------- */
+
+h1,
+h2,
+h3 {
+  color: #111827;
+  margin-bottom: 15px;
+}
+
+.page-title {
+  margin-bottom: 20px;
+}
+
+
+/* -------------------------------------------------------
+   Forms
+-------------------------------------------------------- */
+
+form,
+.form-box {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-bottom: 25px;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  margin-bottom: 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #fff;
+}
+
+textarea {
+  height: 120px;
+  resize: vertical;
+}
+
+label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: block;
+}
+
+
+/* -------------------------------------------------------
+   Buttons
+-------------------------------------------------------- */
+
+button,
+.btn {
+  padding: 10px 16px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover,
+.btn:hover {
+  background: #1d4ed8;
+}
+
+.btn-danger {
+  background: #dc2626;
+}
+
+.btn-danger:hover {
+  background: #b91c1c;
+}
+
+.btn-secondary {
+  background: #6b7280;
+}
+
+.btn-secondary:hover {
+  background: #4b5563;
+}
+
+.btn-small {
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+
+/* -------------------------------------------------------
+   Card Layout (News List)
+-------------------------------------------------------- */
+
+.news-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+}
+
+.news-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.news-meta {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 15px;
+}
+
+.news-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+
+/* -------------------------------------------------------
+   Comments Section
+-------------------------------------------------------- */
+
+.comment-box {
+  margin-top: 30px;
+}
+
+.comment-item {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  border-left: 4px solid #2563eb;
+}
+
+.comment-author {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.comment-text {
+  font-size: 15px;
+}
+
+.comment-date {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* -------------------------------------------------------
+   Detail Page
+-------------------------------------------------------- */
+
+.detail-box {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.detail-body {
+  margin-top: 15px;
+  line-height: 1.6;
+}
+
+
+/* -------------------------------------------------------
+   Links
+-------------------------------------------------------- */
+
+a {
+  text-decoration: none;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Button-like link */
+.link-btn {
+  background: #2563eb;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 6px;
+}
+
+.link-btn:hover {
+  background: #1d4ed8;
+}
+
+
+/* -------------------------------------------------------
+   Responsive
+-------------------------------------------------------- */
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  .news-card {
+    padding: 15px;
+  }
+
+  .navbar {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .news-actions {
+    flex-direction: column;
+  }
+}
