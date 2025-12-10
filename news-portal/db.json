@@ -60,7 +60,14 @@
       "title": "Local Startup Wins Innovation Award",
       "body": "A Dhaka-based startup has won an international innovation award for AI-driven solutions...",
       "author_id": 2,
-      "comments": []
+      "comments": [
+        {
+          "id": 1765376897293,
+          "text": "great",
+          "user_id": 1,
+          "timestamp": "2025-12-10T14:28:17.293Z"
+        }
+      ]
     },
     {
       "id": "4e77",
@@ -68,6 +75,20 @@
       "body": "this is a test news",
       "author_id": 2,
       "comments": []
+    },
+    {
+      "id": "cfae",
+      "title": "Sheikh Hasina is Coming Back",
+      "body": "Our reporter Polok provided us with a news that sheikh hasina is coming back to bangladesh.",
+      "author_id": 1,
+      "comments": [
+        {
+          "id": 1765377039125,
+          "text": "source: chalaiden",
+          "user_id": 1,
+          "timestamp": "2025-12-10T14:30:39.125Z"
+        }
+      ]
     }
   ]
 }
