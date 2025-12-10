@@ -46,6 +46,12 @@
           "text": "i am karim. commenting on news 1\n",
           "user_id": 2,
           "timestamp": "2025-12-10T07:17:34.870Z"
+        },
+        {
+          "id": 1765370572916,
+          "text": "karims comment",
+          "user_id": 2,
+          "timestamp": "2025-12-10T12:42:52.916Z"
         }
       ]
     },
@@ -53,6 +59,13 @@
       "id": "2",
       "title": "Local Startup Wins Innovation Award",
       "body": "A Dhaka-based startup has won an international innovation award for AI-driven solutions...",
+      "author_id": 2,
+      "comments": []
+    },
+    {
+      "id": "4e77",
+      "title": "test news",
+      "body": "this is a test news",
       "author_id": 2,
       "comments": []
     }
