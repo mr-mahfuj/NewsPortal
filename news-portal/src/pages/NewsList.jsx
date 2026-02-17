@@ -19,11 +19,6 @@ export default function NewsList() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!userId) {
-      navigate("/login");
-      return;
-    }
-
     const fetchNews = async () => {
       try {
         const res = await getNews();
@@ -52,7 +47,7 @@ export default function NewsList() {
     };
 
     fetchNews();
-  }, [userId, navigate]);
+  }, [navigate]);
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
@@ -108,15 +103,25 @@ export default function NewsList() {
           <h1>📰 News Portal</h1>
         </div>
         <div className="navbar-right">
-          {userName && <span className="logged-in-text">Logged in as: <strong>{userName}</strong></span>}
-          <button className="logout-btn" onClick={handleLogout}>Logout</button>
+          {userName ? (
+            <>
+              <span className="logged-in-text">Logged in as: <strong>{userName}</strong></span>
+              <button className="logout-btn" onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <button className="logout-btn" onClick={() => navigate("/login")}>Login</button>
+          )}
         </div>
       </div>
 
       <div className="news-header">
         <div className="header-top">
           <h2>All News</h2>
-          <a className="btn btn-primary" href="/create">+ Create News</a>
+          {userId ? (
+            <a className="btn btn-primary" href="/create">+ Create News</a>
+          ) : (
+            <button className="btn btn-primary" onClick={() => navigate("/login")}>Login to Create</button>
+          )}
         </div>
         
         <div className="search-bar">
@@ -151,7 +156,7 @@ export default function NewsList() {
                 <div className="article-actions">
                   <a className="btn btn-small btn-view" href={`/news/${n.id}`}>View Details</a>
 
-                  {n.author_id === userId && (
+                  {userId && n.author_id === userId && (
                     <>
                       <a className="btn btn-small btn-secondary" href={`/edit/${n.id}`}>Edit</a>
                       <button 

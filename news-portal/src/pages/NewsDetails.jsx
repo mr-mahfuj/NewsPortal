@@ -8,6 +8,7 @@ export default function NewsDetails() {
   const navigate = useNavigate();
   const [news, setNews] = useState(null);
   const [comment, setComment] = useState("");
+  const [guestName, setGuestName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -17,21 +18,23 @@ export default function NewsDetails() {
   const userId = Number(localStorage.getItem("user"));
 
   useEffect(() => {
-    if (!userId) {
-      navigate("/login");
-      return;
-    }
-
     const fetchNews = async () => {
       try {
         const res = await getNewsById(id);
         setNews(res.data);
 
-        const authorRes = await getUser(res.data.author_id);
-        setAuthorName(authorRes.data.name);
+        try {
+          const authorRes = await getUser(res.data.author_id);
+          setAuthorName(authorRes.data.name);
+        } catch (err) {
+          setAuthorName("Unknown");
+        }
 
         const names = {};
         for (const comment of res.data.comments || []) {
+          if (!comment.user_id) {
+            continue;
+          }
           if (!names[comment.user_id]) {
             try {
               const userRes = await getUser(comment.user_id);
@@ -51,13 +54,18 @@ export default function NewsDetails() {
     };
 
     fetchNews();
-  }, [id, userId, navigate]);
+  }, [id, navigate]);
 
   const addComment = async (e) => {
     e.preventDefault();
     
     if (!comment.trim()) {
       setError("Comment text cannot be empty");
+      return;
+    }
+
+    if (!userId && !guestName.trim()) {
+      setError("Please enter your name to comment");
       return;
     }
 
@@ -70,7 +78,8 @@ export default function NewsDetails() {
           {
             id: Date.now(),
             text: comment.trim(),
-            user_id: userId,
+            user_id: userId || null,
+            user_name: userId ? undefined : guestName.trim(),
             timestamp: new Date().toISOString()
           }
         ]
@@ -84,7 +93,7 @@ export default function NewsDetails() {
       
       // Update user names map
       const userNamesTemp = { ...userNames };
-      if (!userNamesTemp[userId]) {
+      if (userId && !userNamesTemp[userId]) {
         const userRes = await getUser(userId);
         userNamesTemp[userId] = userRes.data.name;
         setUserNames(userNamesTemp);
@@ -129,7 +138,7 @@ export default function NewsDetails() {
             news.comments.map(c => (
               <div key={c.id} className="comment-item">
                 <div className="comment-header">
-                  <strong className="commenter-name">{userNames[c.user_id] || "Unknown"}</strong>
+                  <strong className="commenter-name">{c.user_name || userNames[c.user_id] || "Anonymous"}</strong>
                   <span className="comment-time">
                     {new Date(c.timestamp).toLocaleDateString()}
                   </span>
@@ -144,6 +153,20 @@ export default function NewsDetails() {
 
         <form onSubmit={addComment} className="add-comment-form">
           <h3>Add Your Comment</h3>
+          {!userId && (
+            <div className="form-group">
+              <input
+                type="text"
+                value={guestName}
+                onChange={e => {
+                  setGuestName(e.target.value);
+                  setError("");
+                }}
+                placeholder="Your name"
+                className="comment-textarea"
+              />
+            </div>
+          )}
           <div className="form-group">
             <textarea
               value={comment}
