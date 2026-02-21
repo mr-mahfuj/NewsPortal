@@ -1,96 +1,103 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUsers } from "../api/api";
+import { login } from "../api/api";
 import "./Login.css";
 
 export default function Login() {
-  const [users, setUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const checkIfLoggedIn = () => {
-      const loggedInUser = localStorage.getItem("user");
-      if (loggedInUser) {
+      const token = localStorage.getItem("token");
+      const storedUserName = localStorage.getItem("userName");
+      if (token && storedUserName) {
         navigate("/");
+        return;
+      }
+      if (token && !storedUserName) {
+        localStorage.removeItem("token");
       }
     };
 
     checkIfLoggedIn();
-    
-    getUsers()
-      .then(res => {
-        setUsers(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError("Failed to load users");
-        setLoading(false);
-        console.error("Error:", err);
-      });
   }, [navigate]);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     
-    if (!selectedUser) {
-      setError("Please select a user");
+    if (!username || !password) {
+      setError("Please enter both username and password");
       return;
     }
 
-    const user = users.find(u => u.id == selectedUser);
-    if (user) {
-      localStorage.setItem("user", selectedUser);
-      localStorage.setItem("userName", user.name);
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await login({ username, password });
+      const { access_token, user } = response.data;
+      
+      // Store token and user info
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("user", user.id);
+      localStorage.setItem("userName", user.username);
+      
       navigate("/");
-    } else {
-      setError("User not found");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Login failed. Please check your credentials.");
+      console.error("Login error:", err);
+    } finally {
+      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="login-container">
-        <div className="login-box">
-          <p>Loading users...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="login-container">
       <div className="login-box">
         <h1>📰 News Portal</h1>
-        <p className="login-subtitle">Select your account to continue</p>
+        <p className="login-subtitle">Login to continue</p>
         
         <form onSubmit={handleLogin}>
           <div className="form-group">
-            <label htmlFor="user-select">Your Name:</label>
-            <select
-              id="user-select"
-              value={selectedUser}
+            <label htmlFor="username">Username:</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
               onChange={(e) => {
-                setSelectedUser(e.target.value);
+                setUsername(e.target.value);
                 setError("");
               }}
-              className="user-select"
-            >
-              <option value="">-- Select a user --</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name}
-                </option>
-              ))}
-            </select>
+              className="form-input"
+              placeholder="Enter your username"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password:</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
+              className="form-input"
+              placeholder="Enter your password"
+              disabled={loading}
+            />
           </div>
 
           {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" className="login-button">
-            Login
+          <button type="submit" className="login-button" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

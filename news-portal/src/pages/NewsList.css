@@ -12,6 +12,8 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 3px solid #667eea;
+  position: relative;
+  z-index: 10;
 }
 
 .navbar-left h1 {
@@ -24,6 +26,8 @@
   display: flex;
   gap: 20px;
   align-items: center;
+  position: relative;
+  z-index: 20;
 }
 
 .logged-in-text {
@@ -44,11 +48,17 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 0.9rem;
   transition: background 0.3s;
+  font-family: inherit;
 }
 
 .logout-btn:hover {
   background: #d33;
+}
+
+.logout-btn:active {
+  transform: scale(0.98);
 }
 
 .news-header {
@@ -71,6 +81,12 @@
   font-size: 1.5rem;
 }
 
+.login-hint {
+  color: #666;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
 .btn {
   display: inline-block;
   padding: 10px 20px;
@@ -79,15 +95,22 @@
   text-decoration: none;
   border-radius: 6px;
   font-weight: 600;
+  font-size: 1rem;
   border: none;
   cursor: pointer;
   transition: all 0.3s;
+  font-family: inherit;
+  line-height: 1.5;
 }
 
 .btn:hover {
   background: #764ba2;
   transform: translateY(-2px);
   box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn:active {
+  transform: translateY(0);
 }
 
 .btn-primary {

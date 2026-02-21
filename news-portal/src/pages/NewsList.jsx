@@ -12,31 +12,30 @@ export default function NewsList() {
   const [error, setError] = useState("");
   const [userMap, setUserMap] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
+  const [userId, setUserId] = useState(() => localStorage.getItem("user"));
+  const [userName, setUserName] = useState(() => localStorage.getItem("userName"));
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
   const itemsPerPage = 6;
   
-  const userId = Number(localStorage.getItem("user"));
-  const userName = localStorage.getItem("userName");
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNews = async () => {
       try {
         const res = await getNews();
-        setNews(res.data);
-        setFilteredNews(res.data);
+        const newsData = res.data || [];
+        setNews(newsData);
+        setFilteredNews(newsData);
         
-        // Fetch all users to create a map
+        // Build user map from author data in news response
         const users = {};
-        for (const item of res.data) {
-          if (!users[item.author_id]) {
-            try {
-              const userRes = await getUser(item.author_id);
-              users[item.author_id] = userRes.data.name;
-            } catch (err) {
-              users[item.author_id] = "Unknown";
-            }
+        newsData.forEach(item => {
+          if (item.author && item.author.username) {
+            users[item.author_id] = item.author.full_name || item.author.username;
+          } else {
+            users[item.author_id] = "Unknown";
           }
-        }
+        });
         setUserMap(users);
         setLoading(false);
       } catch (err) {
@@ -47,7 +46,7 @@ export default function NewsList() {
     };
 
     fetchNews();
-  }, [navigate]);
+  }, []);
 
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
@@ -85,6 +84,10 @@ export default function NewsList() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("userName");
+    localStorage.removeItem("token");
+    setUserId(null);
+    setUserName(null);
+    setToken(null);
     navigate("/login");
   };
 
@@ -103,13 +106,13 @@ export default function NewsList() {
           <h1>📰 News Portal</h1>
         </div>
         <div className="navbar-right">
-          {userName ? (
+          {token ? (
             <>
-              <span className="logged-in-text">Logged in as: <strong>{userName}</strong></span>
-              <button className="logout-btn" onClick={handleLogout}>Logout</button>
+              <span className="logged-in-text">Logged in as: <strong>{userName || "User"}</strong></span>
+              <button type="button" className="logout-btn" onClick={handleLogout}>Logout</button>
             </>
           ) : (
-            <button className="logout-btn" onClick={() => navigate("/login")}>Login</button>
+            <button type="button" className="logout-btn" onClick={() => navigate("/login")}>Login</button>
           )}
         </div>
       </div>
@@ -117,10 +120,10 @@ export default function NewsList() {
       <div className="news-header">
         <div className="header-top">
           <h2>All News</h2>
-          {userId ? (
-            <a className="btn btn-primary" href="/create">+ Create News</a>
+          {token ? (
+            <button type="button" className="btn btn-primary" onClick={() => navigate("/create")}>+ Create News</button>
           ) : (
-            <button className="btn btn-primary" onClick={() => navigate("/login")}>Login to Create</button>
+            <span className="login-hint">Login to create news</span>
           )}
         </div>
         
@@ -148,17 +151,17 @@ export default function NewsList() {
               <div key={n.id} className="article-wrapper">
                 <NewsArticle 
                   title={n.title} 
-                  body={n.body} 
+                  body={n.content || n.body} 
                   authorName={userMap[n.author_id] || "Unknown"}
-                  commentCount={n.comments?.length || 0}
+                  commentCount={0}
                 />
 
                 <div className="article-actions">
-                  <a className="btn btn-small btn-view" href={`/news/${n.id}`}>View Details</a>
+                  <button className="btn btn-small btn-view" onClick={() => navigate(`/news/${n.id}`)}>View Details</button>
 
                   {userId && n.author_id === userId && (
                     <>
-                      <a className="btn btn-small btn-secondary" href={`/edit/${n.id}`}>Edit</a>
+                      <button className="btn btn-small btn-secondary" onClick={() => navigate(`/edit/${n.id}`)}>Edit</button>
                       <button 
                         className="btn btn-small btn-danger" 
                         onClick={() => handleDelete(n.id, n.author_id)}

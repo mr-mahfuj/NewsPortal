@@ -10,7 +10,7 @@ export default function EditNews() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const userId = Number(localStorage.getItem("user"));
+  const userId = localStorage.getItem("user");
 
   useEffect(() => {
     if (!userId) {
@@ -48,7 +48,8 @@ export default function EditNews() {
       return;
     }
 
-    if (news.body.length < 20) {
+    const content = news.content || news.body || "";
+    if (content.length < 20) {
       setError("News body must be at least 20 characters");
       return;
     }
@@ -57,7 +58,7 @@ export default function EditNews() {
       setSaving(true);
       await updateNews(id, {
         title: news.title.trim(),
-        body: news.body.trim()
+        content: news.content.trim()
       });
       navigate("/");
     } catch (err) {
@@ -114,16 +115,16 @@ export default function EditNews() {
             <label htmlFor="body">Article Content *</label>
             <textarea 
               id="body"
-              value={news.body} 
+              value={news.content || news.body || ""} 
               onChange={e => {
-                setNews({ ...news, body: e.target.value });
+                setNews({ ...news, content: e.target.value });
                 setError("");
               }}
               placeholder="Enter news content..."
               rows="10"
               className="form-textarea"
             />
-            <div className="char-count">{news.body.length} characters</div>
+            <div className="char-count">{(news.content || news.body || "").length} characters</div>
           </div>
 
           {error && <div className="error-message">{error}</div>}

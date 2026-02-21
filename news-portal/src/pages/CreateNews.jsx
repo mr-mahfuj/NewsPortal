@@ -8,7 +8,7 @@ export default function CreateNews() {
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const userId = Number(localStorage.getItem("user"));
+  const userId = localStorage.getItem("user");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -33,9 +33,8 @@ export default function CreateNews() {
       setLoading(true);
       await createNews({
         title: title.trim(),
-        body: body.trim(),
-        author_id: userId,
-        comments: []
+        content: body.trim(),
+        category: "General"
       });
       navigate("/");
     } catch (err) {

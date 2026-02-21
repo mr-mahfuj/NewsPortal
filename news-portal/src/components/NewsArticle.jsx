@@ -2,6 +2,7 @@ import './NewsArticle.css'
 
 export default function NewsArticle({ title, body, authorName, commentCount }) {
     const truncateText = (text, maxLength) => {
+        if (!text) return '';
         if (text.length > maxLength) {
             return text.substring(0, maxLength) + "...";
         }

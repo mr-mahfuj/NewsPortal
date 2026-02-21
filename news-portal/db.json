@@ -89,6 +89,13 @@
           "timestamp": "2025-12-10T14:30:39.125Z"
         }
       ]
+    },
+    {
+      "id": "338f",
+      "title": "Nusrats first news",
+      "body": "This is Nusrats first news",
+      "author_id": 3,
+      "comments": []
     }
   ]
 }
