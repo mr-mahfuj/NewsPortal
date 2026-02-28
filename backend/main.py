@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
@@ -41,6 +41,7 @@ client = MongoClient(MONGODB_URI)
 db = client["news-portal"]
 users_collection = db["users"]
 news_collection = db["news"]
+comments_collection = db["comments"]
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -68,6 +69,18 @@ class NewsUpdate(BaseModel):
     content: Optional[str] = None
     category: Optional[str] = None
     image_url: Optional[str] = None
+
+class CommentCreate(BaseModel):
+    text: str
+
+class CommentResponse(BaseModel):
+    id: str
+    news_id: str
+    user_id: str
+    username: str
+    full_name: Optional[str]
+    text: str
+    created_at: datetime
 
 class NewsResponse(BaseModel):
     id: str
@@ -104,7 +117,11 @@ def decode_token(token: str):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    token = credentials.credentials
+    try:
+        token = credentials.credentials
+    except AttributeError:
+        raise HTTPException(status_code=401, detail="Invalid authentication credentials")
+    
     payload = decode_token(token)
     user_id = payload.get("sub")
     if user_id is None:
@@ -113,6 +130,23 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
     return user
+
+
+async def get_current_user_optional(request: Request):
+    """Optional authentication - useful for endpoints that work with or without auth"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    
+    token = auth_header.split(" ")[1]
+    try:
+        payload = decode_token(token)
+        user_id = payload.get("sub")
+        if user_id:
+            return users_collection.find_one({"_id": ObjectId(user_id)})
+    except:
+        pass
+    return None
 
 
 @app.post("/register", status_code=status.HTTP_201_CREATED)
@@ -270,7 +304,100 @@ def delete_news(news_id: str, current_user: dict = Depends(get_current_user)):
             raise HTTPException(status_code=403, detail="Not authorized to delete this news")
         
         news_collection.delete_one({"_id": ObjectId(news_id)})
+        # Also delete associated comments
+        comments_collection.delete_many({"news_id": news_id})
         return {"message": "News deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# ==================== COMMENTS ENDPOINTS ====================
+
+@app.post("/news/{news_id}/comments", status_code=status.HTTP_201_CREATED)
+def create_comment(news_id: str, comment: CommentCreate, current_user: dict = Depends(get_current_user)):
+    try:
+        # Verify news exists
+        news = news_collection.find_one({"_id": ObjectId(news_id)})
+        if not news:
+            raise HTTPException(status_code=404, detail="News not found")
+        
+        # Create comment
+        comment_data = {
+            "news_id": news_id,
+            "user_id": str(current_user["_id"]),
+            "username": current_user["username"],
+            "full_name": current_user.get("full_name"),
+            "text": comment.text,
+            "created_at": datetime.utcnow()
+        }
+        result = comments_collection.insert_one(comment_data)
+        
+        return {
+            "message": "Comment created successfully",
+            "id": str(result.inserted_id),
+            "comment": {
+                "id": str(result.inserted_id),
+                "news_id": comment_data["news_id"],
+                "user_id": comment_data["user_id"],
+                "username": comment_data["username"],
+                "full_name": comment_data["full_name"],
+                "text": comment_data["text"],
+                "created_at": comment_data["created_at"].isoformat()
+            }
+        }
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/news/{news_id}/comments")
+def get_news_comments(news_id: str):
+    try:
+        # Verify news exists
+        news = news_collection.find_one({"_id": ObjectId(news_id)})
+        if not news:
+            raise HTTPException(status_code=404, detail="News not found")
+        
+        # Get all comments for this news
+        comments = []
+        for comment in comments_collection.find({"news_id": news_id}).sort("created_at", -1):
+            comments.append({
+                "id": str(comment["_id"]),
+                "news_id": comment["news_id"],
+                "user_id": comment["user_id"],
+                "username": comment["username"],
+                "full_name": comment.get("full_name"),
+                "text": comment["text"],
+                "created_at": comment["created_at"].isoformat()
+            })
+        
+        return {
+            "news_id": news_id,
+            "count": len(comments),
+            "comments": comments
+        }
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete("/comments/{comment_id}")
+def delete_comment(comment_id: str, current_user: dict = Depends(get_current_user)):
+    try:
+        comment = comments_collection.find_one({"_id": ObjectId(comment_id)})
+        if not comment:
+            raise HTTPException(status_code=404, detail="Comment not found")
+        
+        # Verify user is the comment author
+        if comment["user_id"] != str(current_user["_id"]):
+            raise HTTPException(status_code=403, detail="Not authorized to delete this comment")
+        
+        comments_collection.delete_one({"_id": ObjectId(comment_id)})
+        return {"message": "Comment deleted successfully"}
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

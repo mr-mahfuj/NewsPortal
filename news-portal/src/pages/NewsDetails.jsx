@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getNewsById } from "../api/api";
+import { getNewsById, getNews } from "../api/api";
+import Comments from "../components/Comments";
 import "./NewsDetails.css";
 
 export default function NewsDetails() {
@@ -10,6 +11,7 @@ export default function NewsDetails() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [authorName, setAuthorName] = useState("");
+  const [users, setUsers] = useState([]);
   
   const userId = localStorage.getItem("user");
 
@@ -27,6 +29,14 @@ export default function NewsDetails() {
           setAuthorName("Unknown");
         }
 
+        // Fetch all users for comment display
+        const usersRes = await getNews(); // This gets all data including users if available
+        if (usersRes.data && Array.isArray(usersRes.data)) {
+          // If the API returns just news array, we'll fetch users separately
+          // For now, we'll set an empty array and users will be looked up by ID
+          setUsers([]);
+        }
+
         setLoading(false);
       } catch (err) {
         setError("Failed to load news");
@@ -37,6 +47,16 @@ export default function NewsDetails() {
 
     fetchNews();
   }, [id, navigate]);
+
+  const handleCommentAdded = async () => {
+    // Refresh the news data to get updated comments
+    try {
+      const res = await getNewsById(id);
+      setNews(res.data);
+    } catch (err) {
+      console.error("Error refreshing comments:", err);
+    }
+  };
 
   if (loading) {
     return <div className="news-details-container"><p>Loading...</p></div>;
@@ -68,10 +88,15 @@ export default function NewsDetails() {
       <div className="news-info-section">
         <h3>Article Information</h3>
         <p><strong>Category:</strong> {news.category || "General"}</p>
-        <p><strong>Published:</strong> {new Date(news.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-        <p><strong>Last Updated:</strong> {new Date(news.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <p><strong>Published:</strong> {news.created_at ? new Date(news.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</p>
+        <p><strong>Last Updated:</strong> {news.updated_at ? new Date(news.updated_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</p>
       </div>
+
+      {/* Comments Section */}
+      <Comments 
+        newsId={id}
+        onCommentAdded={handleCommentAdded}
+      />
     </div>
   );
 }
-    

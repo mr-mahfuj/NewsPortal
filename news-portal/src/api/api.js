@@ -25,6 +25,11 @@ export const createNews = (data) => API.post("/news", data);
 export const updateNews = (id, data) => API.patch(`/news/${id}`, data);
 export const deleteNews = (id) => API.delete(`/news/${id}`);
 
+// Comments API - Updated for FastAPI backend
+export const getComments = (newsId) => API.get(`/news/${newsId}/comments`);
+export const addComment = (newsId, commentData) => API.post(`/news/${newsId}/comments`, commentData);
+export const deleteComment = (commentId) => API.delete(`/comments/${commentId}`);
+
 // Legacy compatibility (if needed)
 export const getUsers = () => getCurrentUser();
 export const getUser = (id) => getCurrentUser();

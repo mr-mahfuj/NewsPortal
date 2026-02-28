@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getNews, deleteNews, getUser } from "../api/api";
+import { getNews, deleteNews, getUser, getComments } from "../api/api";
 import NewsArticle from "../components/NewsArticle";
 import "./NewsList.css";
 
@@ -11,6 +11,7 @@ export default function NewsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [userMap, setUserMap] = useState({});
+  const [commentCounts, setCommentCounts] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const [userId, setUserId] = useState(() => localStorage.getItem("user"));
   const [userName, setUserName] = useState(() => localStorage.getItem("userName"));
@@ -37,6 +38,27 @@ export default function NewsList() {
           }
         });
         setUserMap(users);
+
+        // Fetch comment counts for all news in parallel
+        const commentPromises = newsData.map(newsItem =>
+          getComments(newsItem.id)
+            .then(commentsRes => ({
+              id: newsItem.id,
+              count: commentsRes.data.count || 0
+            }))
+            .catch(err => ({
+              id: newsItem.id,
+              count: 0
+            }))
+        );
+
+        const commentResults = await Promise.all(commentPromises);
+        const counts = {};
+        commentResults.forEach(result => {
+          counts[result.id] = result.count;
+        });
+        setCommentCounts(counts);
+
         setLoading(false);
       } catch (err) {
         setError("Failed to load news");
@@ -153,7 +175,7 @@ export default function NewsList() {
                   title={n.title} 
                   body={n.content || n.body} 
                   authorName={userMap[n.author_id] || "Unknown"}
-                  commentCount={0}
+                  commentCount={commentCounts[n.id] || 0}
                 />
 
                 <div className="article-actions">
