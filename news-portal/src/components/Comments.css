@@ -162,7 +162,6 @@
   font-size: 0.95rem;
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
   .comments-section {
     padding: 20px;

@@ -126,19 +126,19 @@ def seed_news(user_ids):
 
 def main():
     """Main seeder function"""
-    print("\n🌱 Starting database seeding...\n")
+    print("\n Starting database seeding...\n")
     
     try:
         user_ids = seed_users()
         seed_news(user_ids)
         
-        print("\n✅ Database seeded successfully!")
+        print("\n Database seeded successfully!")
         print("\nDefault credentials:")
         print("  Username: admin | Password: admin123")
         print("  Username: john_doe | Password: pass123")
         print("  Username: jane_smith | Password: pass123\n")
     except Exception as e:
-        print(f"\n❌ Error seeding database: {str(e)}")
+        print(f"\n Error seeding database: {str(e)}")
     finally:
         client.close()
 

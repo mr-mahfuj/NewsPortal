@@ -13,7 +13,6 @@ export default function Comments({ newsId, onCommentAdded, users }) {
   const currentToken = localStorage.getItem("token");
   const userName = localStorage.getItem("userName") || "Anonymous";
 
-  // Fetch comments when component mounts or newsId changes
   useEffect(() => {
     fetchComments();
   }, [newsId]);
@@ -56,7 +55,6 @@ export default function Comments({ newsId, onCommentAdded, users }) {
       await addComment(newsId, commentData);
       setCommentText("");
       
-      // Refresh comments list
       await fetchComments();
       
       if (onCommentAdded) {
@@ -77,7 +75,6 @@ export default function Comments({ newsId, onCommentAdded, users }) {
     try {
       await deleteComment(commentId);
       
-      // Refresh comments list
       await fetchComments();
     } catch (err) {
       console.error("Error deleting comment:", err);

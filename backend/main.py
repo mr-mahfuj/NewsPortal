@@ -304,24 +304,20 @@ def delete_news(news_id: str, current_user: dict = Depends(get_current_user)):
             raise HTTPException(status_code=403, detail="Not authorized to delete this news")
         
         news_collection.delete_one({"_id": ObjectId(news_id)})
-        # Also delete associated comments
         comments_collection.delete_many({"news_id": news_id})
         return {"message": "News deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
-# ==================== COMMENTS ENDPOINTS ====================
 
 @app.post("/news/{news_id}/comments", status_code=status.HTTP_201_CREATED)
 def create_comment(news_id: str, comment: CommentCreate, current_user: dict = Depends(get_current_user)):
     try:
-        # Verify news exists
         news = news_collection.find_one({"_id": ObjectId(news_id)})
         if not news:
             raise HTTPException(status_code=404, detail="News not found")
         
-        # Create comment
         comment_data = {
             "news_id": news_id,
             "user_id": str(current_user["_id"]),
@@ -354,12 +350,10 @@ def create_comment(news_id: str, comment: CommentCreate, current_user: dict = De
 @app.get("/news/{news_id}/comments")
 def get_news_comments(news_id: str):
     try:
-        # Verify news exists
         news = news_collection.find_one({"_id": ObjectId(news_id)})
         if not news:
             raise HTTPException(status_code=404, detail="News not found")
         
-        # Get all comments for this news
         comments = []
         for comment in comments_collection.find({"news_id": news_id}).sort("created_at", -1):
             comments.append({
@@ -390,7 +384,6 @@ def delete_comment(comment_id: str, current_user: dict = Depends(get_current_use
         if not comment:
             raise HTTPException(status_code=404, detail="Comment not found")
         
-        # Verify user is the comment author
         if comment["user_id"] != str(current_user["_id"]):
             raise HTTPException(status_code=403, detail="Not authorized to delete this comment")
         
