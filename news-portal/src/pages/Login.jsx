@@ -41,7 +41,6 @@ export default function Login() {
       const response = await login({ username, password });
       const { access_token, user } = response.data;
       
-      // Store token and user info
       localStorage.setItem("token", access_token);
       localStorage.setItem("user", user.id);
       localStorage.setItem("userName", user.username);

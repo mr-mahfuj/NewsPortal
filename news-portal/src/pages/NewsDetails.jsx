@@ -22,18 +22,14 @@ export default function NewsDetails() {
         const newsData = res.data;
         setNews(newsData);
 
-        // Get author name from the response
         if (newsData.author) {
           setAuthorName(newsData.author.full_name || newsData.author.username);
         } else {
           setAuthorName("Unknown");
         }
 
-        // Fetch all users for comment display
-        const usersRes = await getNews(); // This gets all data including users if available
-        if (usersRes.data && Array.isArray(usersRes.data)) {
-          // If the API returns just news array, we'll fetch users separately
-          // For now, we'll set an empty array and users will be looked up by ID
+        const usersRes = await getNews(); 
+        if (usersRes.data && Array.isArray(usersRes.data)) {          
           setUsers([]);
         }
 
@@ -49,7 +45,7 @@ export default function NewsDetails() {
   }, [id, navigate]);
 
   const handleCommentAdded = async () => {
-    // Refresh the news data to get updated comments
+    
     try {
       const res = await getNewsById(id);
       setNews(res.data);
