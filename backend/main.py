@@ -269,7 +269,7 @@ def get_news():
 @app.get("/news/{news_id}")
 def get_news_by_id(news_id: str):
     object_id = parse_object_id(news_id, "news")
-    news = News.objects(id=object_id).select_related(max_depth=1).first()
+    news = News.objects(id=object_id).first()
     if not news:
         raise ObjectNotFoundException("News not found")
 
